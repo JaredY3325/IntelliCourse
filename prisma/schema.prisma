@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+
+model Account {
+  id                 String   @id @default(cuid())
+  userId             String       
+  ProviderType       String
+  provider           String
+  providerAccountId  String    
+  refreshToken       String?  @db.Text
+  accessToken        String?  @db.Text
+  accessTokenExpires DateTime? // or Int
+  tokenType          String?
+  scope              String?
+  id_token           String? @db.Text
+  sessionState       String?
+  user               User    @relation(fields:[userId], references:[id], onDelete: Cascade)
+
+  @@index([userId], name: "userId")
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  expires      DateTime
+  userId       String      
+  sessionToken String   @unique 
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "userId")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  name          String?
+  email         String?     @unique
+  emailVerified DateTime?
+  image         String?
+  credits       Int?        @default(10)
+
+  accounts Account[]
+  sessions Session[]
+}
