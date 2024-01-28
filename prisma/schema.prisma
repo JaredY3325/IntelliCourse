@@ -15,13 +15,13 @@ datasource db {
 model Account {
   id                 String   @id @default(cuid())
   userId             String       
-  ProviderType       String
+  type               String
   provider           String
   providerAccountId  String    
   refreshToken       String?  @db.Text
-  accessToken        String?  @db.Text
-  accessTokenExpires DateTime? // or Int
-  tokenType          String?
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
   scope              String?
   id_token           String? @db.Text
   sessionState       String?

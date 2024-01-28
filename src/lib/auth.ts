@@ -1,4 +1,4 @@
-import { DefaultSession, NextAuthOptions } from "next-auth";
+import { DefaultSession, NextAuthOptions, getServerSession } from "next-auth";
 import { prisma } from "./db";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
@@ -20,6 +20,9 @@ declare module "next-auth/jwt" {
 }
 
 export const authOptions: NextAuthOptions = {
+  session: {
+    strategy: "jwt",
+  },
   callbacks: {
     jwt: async ({ token }) => {
       // find user based on jwt token
@@ -55,3 +58,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 };
+export const getAuthSession = () => {
+  return getServerSession(authOptions);
+};
+
+// const deleteAllUsers = async () => {
+//   try {
+//     const deleteResult = await prisma.user.deleteMany({});
+//     console.log(`Delete ${deleteResult.count} users`);
+//   } catch (err) {
+//     console.error("Error deleting users", err);
+//   }
+// };
+
+// deleteAllUsers();
