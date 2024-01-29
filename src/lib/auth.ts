@@ -62,13 +62,13 @@ export const getAuthSession = () => {
   return getServerSession(authOptions);
 };
 
-// const deleteAllUsers = async () => {
-//   try {
-//     const deleteResult = await prisma.user.deleteMany({});
-//     console.log(`Delete ${deleteResult.count} users`);
-//   } catch (err) {
-//     console.error("Error deleting users", err);
-//   }
-// };
+const deleteAllUsers = async () => {
+  try {
+    const deleteResult = await prisma.user.deleteMany({});
+    console.log(`Delete ${deleteResult.count} users`);
+  } catch (err) {
+    console.error("Error deleting users", err);
+  }
+};
 
-// deleteAllUsers();
+deleteAllUsers();
