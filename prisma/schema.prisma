@@ -66,7 +66,7 @@ model Unit {
   courseId String
   
   name String
-  course Course @relation(fields:[courseId], references: [id])
+  course Course @relation(fields:[courseId], references: [id], onDelete: Cascade)
   chapters Chapter[]
 
   @@index([courseId], name: "courseId")
@@ -80,7 +80,7 @@ model Chapter {
   youtubeSearchQuery String // query used for searching youtube video
   videoId String? // link of youtube video
   summary String? @db.VarChar(3000)
-  unit Unit @relation(fields: [unitId], references: [id])
+  unit Unit @relation(fields: [unitId], references: [id], onDelete: Cascade)
   question Question[]
 
   @@index([unitId], name: "unitId")
@@ -93,7 +93,7 @@ model Question{
    question String @db.VarChar(3000)
    answer String @db.VarChar(3000)
    options String @db.VarChar(3000)
-   chapter Chapter @relation(fields: [chapterId], references: [id])
+   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
    @@index([chapterId], name:"chapterId")
 

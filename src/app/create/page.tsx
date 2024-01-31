@@ -1,4 +1,4 @@
-import CourseForm from "@/components/CourseForm";
+import CreateCourseForm from "@/components/CreateCourseForm";
 import { getAuthSession } from "@/lib/auth";
 import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -26,7 +26,7 @@ const page = async (props: Props) => {
           personalized course tailored to your needs.
         </div>
       </div>
-      <CourseForm />
+      <CreateCourseForm />
     </div>
   );
 };

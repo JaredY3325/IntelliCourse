@@ -19,28 +19,61 @@ import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { Plus, Trash } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
+import { useToast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
 
 type Props = {};
-
 type formInput = z.infer<typeof createCourseSchema>;
 
-const CourseForm = (props: Props) => {
-  const [submitError, setSubmitError] = useState(" ");
+const CreateCourseForm = (props: Props) => {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const { mutate: createChapters, isPending } = useMutation({
+    mutationFn: async ({ title, units }: formInput) => {
+      const response = await axios.post("/qpi/course/createChapters", {
+        title,
+        units,
+      });
+      return response.data();
+    },
+  });
 
   const form = useForm<formInput>({
     resolver: zodResolver(createCourseSchema),
     defaultValues: { title: "", units: ["", "", ""] },
   });
 
-  const isLoading = form.formState.isLoading;
+  const onSubmit: SubmitHandler<formInput> = async (data: formInput) => {
+    if (data.units.some((unit) => unit === "")) {
+      toast({
+        title: "Error",
+        description: "Please fill out all the units",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const onSubmit: SubmitHandler<formInput> = async (data) => {
-    // TO-DO: Error handling
-    console.log(data);
+    createChapters(data, {
+      onSuccess: ({ course_id }) => {
+        toast({
+          title: "Success",
+          description: "Course created succesfully",
+        });
+        router.push(`/create/${course_id}`);
+      },
+      onError: (error) => {
+        console.error(error);
+        toast({
+          title: "Error",
+          description: "Something went wrong",
+          variant: "destructive",
+        });
+      },
+    });
   };
-
-  form.watch();
-  console.log(form.watch());
 
   return (
     <Form {...form}>
@@ -127,7 +160,10 @@ const CourseForm = (props: Props) => {
               variant="secondary"
               className="font-semibold ml-2"
               onClick={() => {
-                form.setValue("units", [...form.watch("units").slice(0, -1)]);
+                const units = form.getValues("units");
+                if (units.length > 1) {
+                  form.setValue("units", [...form.watch("units").slice(0, -1)]);
+                }
               }}
             >
               Remove Unit
@@ -137,7 +173,12 @@ const CourseForm = (props: Props) => {
           <Separator className="flex-[1]" />
         </div>
 
-        <Button type="submit" className="w-full mt-6" size="lg">
+        <Button
+          disabled={isPending}
+          type="submit"
+          className="w-full mt-6"
+          size="lg"
+        >
           Generate Course
         </Button>
       </form>
@@ -145,4 +186,4 @@ const CourseForm = (props: Props) => {
   );
 };
 
-export default CourseForm;
+export default CreateCourseForm;

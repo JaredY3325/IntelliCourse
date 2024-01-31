@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/lib/providers/next-theme-provider";
+import { QueryProvider } from "@/lib/providers/query-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 const lexend = Lexend({ subsets: ["latin"] });
 
@@ -20,10 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn(lexend.className, "antialiased min-h-screen ")}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
-          {children}
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <Navbar />
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
