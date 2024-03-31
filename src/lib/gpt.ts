@@ -12,7 +12,7 @@ export async function strict_output(
   system_prompt: string,
   user_prompt: string | string[],
   output_format: OutputFormat,
-  isList: boolean,
+  is_list: Boolean,
   default_category: string = "",
   output_value_only: boolean = false,
   model: string = "gpt-3.5-turbo",
@@ -27,9 +27,11 @@ export async function strict_output(
   let error_msg: string = "";
   let allOutputs = []; // Array to hold outputs for each prompt if multiple prompts are provided
 
+  // normalize user prompts to always be an array
   const prompts = Array.isArray(user_prompt) ? user_prompt : [user_prompt];
 
   for (const individualPrompt of prompts) {
+    // Retry up to a certain number of tries
     for (let i = 0; i < num_tries; i++) {
       let output_format_prompt: string = constructOutputFormatPrompt(
         list_output,
@@ -50,10 +52,12 @@ export async function strict_output(
         response_format: { type: "json_object" },
       });
 
+      // replace single quotes with double quotes for proper JSON
       let res: string =
         response.choices[0].message?.content?.replace(/'/g, '"') ?? "";
       res = res.replace(/(\w)"(\w)/g, "$1'$2");
 
+      // Verbose flag can be enabled for debugging
       if (verbose) {
         console.log("System prompt:", systemMessage);
         console.log("\nUser prompt:", individualPrompt);
@@ -63,27 +67,30 @@ export async function strict_output(
       try {
         let output: any = JSON.parse(res);
 
-        if (list_output && isList && !Array.isArray(output)) {
+        // Wrap the output in an array if expected to be a list but isn't already one
+        if (list_output && is_list && !Array.isArray(output)) {
           output = [output];
         }
-        console.log(output);
+        // console.log(output);
 
-        // Process output verification and modifications here based on your output_format rules
+        // TODO: optionally add output validation here based on the output format
 
         allOutputs.push(output); // Add output for this prompt to the allOutputs array
         break; // Break from the retry loop on success
       } catch (e) {
+        // update error message in case of failures
         error_msg = `\n\nAttempt ${
           i + 1
         } failed with error: ${e}\nResponse: ${res}`;
         if (i === num_tries - 1) {
+          // no more tries left
           console.error(
             "All attempts failed for prompt:",
             individualPrompt,
             "\nFinal Error:",
             e
           );
-          allOutputs.push([]); // Optional: Push an empty array or a placeholder to indicate failure
+          allOutputs.push([]); // Push an empty array to indicate failure
         }
       }
     }
@@ -92,6 +99,7 @@ export async function strict_output(
   return list_input ? allOutputs : allOutputs[0]; // Return all outputs if multiple prompts, otherwise just the first
 }
 
+// Additional formatting instructions for the AI
 function constructOutputFormatPrompt(
   list_output: boolean,
   output_format: OutputFormat,

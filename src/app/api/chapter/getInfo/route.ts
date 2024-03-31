@@ -14,9 +14,11 @@ const bodyParser = z.object({
 });
 
 export async function POST(req: Request, res: Response) {
+  // TODO: Control the rate in which requests are sent to not exceed the rate limit
+
   try {
     const body = await req.json();
-    const { chapterId } = bodyParser.parse(body);
+    const { chapterId } = bodyParser.parse(body); // Validates the parsed body against the zod schema
     const chapter = await prisma.chapter.findUnique({
       where: {
         id: chapterId,
@@ -32,7 +34,7 @@ export async function POST(req: Request, res: Response) {
 
     const videoId = await searchYoutube(chapter.youtubeSearchQuery);
     let transcript = await getTranscript(videoId);
-    const maxLength = 1500;
+    const maxLength = 600;
     transcript = transcript.split(" ").slice(0, maxLength).join(" ");
 
     // generating summary
@@ -50,9 +52,19 @@ export async function POST(req: Request, res: Response) {
       chapter.name
     );
 
+    // filter out questions that are null or undefined due to unpredictable api errors
+    const validQuestions = questions.filter(
+      (question) =>
+        question.question != null &&
+        question.answer != null &&
+        question.option1 != null &&
+        question.option2 != null &&
+        question.option3 != null
+    );
+
     // populate question schema with generated questions
     await prisma.question.createMany({
-      data: questions.map((question) => {
+      data: validQuestions.map((question) => {
         let options = [
           question.answer,
           question.option1,
@@ -76,12 +88,13 @@ export async function POST(req: Request, res: Response) {
       where: { id: chapterId },
       data: {
         videoId: videoId,
-        summary: summary,
+        summary: summary?.summary ?? "",
       },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error(error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {

@@ -32,6 +32,7 @@ const ConfirmChapters = ({ course }: Props) => {
     new Set()
   );
 
+  // Keeps a memo of total count of chapters
   const totalChaptersCount = React.useMemo(() => {
     return course.units.reduce((acc, units) => {
       return acc + units.chapters.length;
@@ -76,20 +77,30 @@ const ConfirmChapters = ({ course }: Props) => {
             <ChevronLeft className="w-4 h-4 mr-2" strokeWidth={4} />
             Back
           </Link>
-          <Button
-            type="button"
-            className="ml-4"
-            disabled={loading}
-            onClick={() => {
-              setLoading(true);
-              Object.values(chapterRefs).forEach((ref) => {
-                ref.current?.triggerLoad();
-              });
-            }}
-          >
-            Generate
-            <ChevronRight className="w-4 h-4 ml-2" strokeWidth={4} />
-          </Button>
+          {totalChaptersCount == completedChapters.size ? (
+            <Link
+              href={`/course/${course.id}/0/0`}
+              className={buttonVariants({ className: "ml-4 font-semibold" })}
+            >
+              Save & Continue
+              <ChevronRight className="w-4 h-4 ml-2" />
+            </Link>
+          ) : (
+            <Button
+              type="button"
+              className="ml-4"
+              disabled={loading}
+              onClick={() => {
+                setLoading(true);
+                Object.values(chapterRefs).forEach((ref) => {
+                  ref.current?.triggerLoad();
+                });
+              }}
+            >
+              Generate
+              <ChevronRight className="w-4 h-4 ml-2" strokeWidth={4} />
+            </Button>
+          )}
         </div>
         <Separator className="flex-[1]" />
       </div>
