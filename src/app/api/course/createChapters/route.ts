@@ -18,24 +18,28 @@ export async function POST(req: Request, res: Response) {
     const { title, units } = createCourseSchema.parse(body);
 
     let output_units: outputUnits = await strict_output(
-      "You're an AI capable of curating course content, coming up with relevant chapter title, and finding relevant youtube videos for each chapter. ",
-      new Array(units.length).fill(
-        `It is your job to create a course about ${title}. The user has request to create chapters for each of the units. Then, for each chapter, provide a detailed 
-        youtube search query that can be used to find an informative educational video for each chapter that optimizes learning and comprehension. Each query should give an educational informative course`
+      "You are an AI capable of curating course content, coming up with relevant chapter titles, and finding relevant youtube videos for each chapter",
+      units.map(
+        (unit, index) =>
+          `It is your job to create a course about ${title}, specifically for unit of ${unit}. The user has requested to create chapters for each of the units. Then, for each chapter, provide a detailed youtube search query that can be used to find an informative educational video for each chapter. Each query should give an educational informative course on YouTube. The generated response must be in valid JSON format. The output for each unit should look like this:`
       ),
       {
         title: "title of the unit",
         chapters:
           "an array of chapters, each chapter should have a youtube_search_query and a chapter_title key in the JSON object",
-      }
+      },
+      true
     );
 
+    output_units = Array.isArray(output_units) ? output_units : [output_units];
+
     const imageSearchTerm = await strict_output(
-      `Your are an AI capable of finding the most relevant image for a course'`,
-      `Please provide a good image search term for the title of a course about ${title}. This search term will be fed into the unspalsh API, so make sure it is a good search term that will return good results`,
+      "you are an AI capable of finding the most relevant image for a course",
+      `Please provide a good image search term for the title of a course about ${title}. This search term will be fed into the unsplash API, so make sure it is a good search term that will return good results. Ensure the output is in valid JSON format.`,
       {
-        image_search_term: `a good search term for the title of the course`,
-      }
+        image_search_term: "a good search term for the title of the course",
+      },
+      false
     );
 
     const course_image = await getUnspalshImage(

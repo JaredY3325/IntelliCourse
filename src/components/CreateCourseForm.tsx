@@ -33,11 +33,11 @@ const CreateCourseForm = (props: Props) => {
 
   const { mutate: createChapters, isPending } = useMutation({
     mutationFn: async ({ title, units }: formInput) => {
-      const response = await axios.post("/qpi/course/createChapters", {
+      const response = await axios.post("/api/course/createChapters", {
         title,
         units,
       });
-      return response.data();
+      return response.data;
     },
   });
 

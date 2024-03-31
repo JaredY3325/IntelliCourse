@@ -6,6 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
+      // make JWT include id and credit
       id: string;
       credits: number;
     } & DefaultSession["user"];
@@ -21,6 +22,7 @@ declare module "next-auth/jwt" {
 
 export const authOptions: NextAuthOptions = {
   session: {
+    // Configured to use JWT for session management. stored on client-side
     strategy: "jwt",
   },
   callbacks: {
@@ -31,13 +33,14 @@ export const authOptions: NextAuthOptions = {
           email: token.email,
         },
       });
-      // bind database id and credit with jwt token
+      // bind database id and credit with jwt token, everytime a JWT is issuedf
       if (db_user) {
         token.id = db_user.id;
         token.credits = db_user.credits as number;
       }
       return token;
     },
+    // Updates sessions to include user details from token, allowing them to be accessed on client side
     session: ({ session, token }) => {
       if (token) {
         session.user.id = token.id;
