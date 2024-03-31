@@ -23,6 +23,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+import SubscriptionAction from "./SubscriptionAction";
 
 type Props = {};
 type formInput = z.infer<typeof createCourseSchema>;
@@ -182,6 +183,7 @@ const CreateCourseForm = (props: Props) => {
           Generate Course
         </Button>
       </form>
+      <SubscriptionAction />
     </Form>
   );
 };

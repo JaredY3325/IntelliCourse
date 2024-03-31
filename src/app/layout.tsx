@@ -6,7 +6,7 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/lib/providers/next-theme-provider";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { Toaster } from "@/components/ui/toaster";
-
+import { SessionProvider } from "@/lib/providers/next-session-provider";
 const lexend = Lexend({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -24,9 +24,11 @@ export default function RootLayout({
       <body className={cn(lexend.className, "antialiased min-h-screen ")}>
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <Navbar />
-            {children}
-            <Toaster />
+            <SessionProvider>
+              <Navbar />
+              {children}
+              <Toaster />
+            </SessionProvider>
           </ThemeProvider>
         </QueryProvider>
       </body>
