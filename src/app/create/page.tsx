@@ -1,5 +1,6 @@
 import CreateCourseForm from "@/components/CreateCourseForm";
 import { getAuthSession } from "@/lib/auth";
+import { checkSubscription } from "@/lib/subscription";
 import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -8,6 +9,7 @@ type Props = {};
 
 const page = async (props: Props) => {
   const session = await getAuthSession();
+  const isPro = await checkSubscription();
 
   if (!session?.user) {
     return redirect("/gallery");
@@ -26,7 +28,7 @@ const page = async (props: Props) => {
           personalized course tailored to your needs.
         </div>
       </div>
-      <CreateCourseForm />
+      <CreateCourseForm isPro={isPro} />
     </div>
   );
 };

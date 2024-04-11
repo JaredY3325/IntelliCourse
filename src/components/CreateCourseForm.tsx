@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 
 import {
   Form,
@@ -25,10 +25,12 @@ import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import SubscriptionAction from "./SubscriptionAction";
 
-type Props = {};
+type Props = {
+  isPro: boolean;
+};
 type formInput = z.infer<typeof createCourseSchema>;
 
-const CreateCourseForm = (props: Props) => {
+const CreateCourseForm = ({ isPro }: Props) => {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -183,7 +185,7 @@ const CreateCourseForm = (props: Props) => {
           Generate Course
         </Button>
       </form>
-      <SubscriptionAction />
+      {!isPro && <SubscriptionAction />}
     </Form>
   );
 };

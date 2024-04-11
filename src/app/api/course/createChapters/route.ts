@@ -1,7 +1,9 @@
 // api/course/creatChapters endpoint
 
+import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { strict_output } from "@/lib/gpt";
+import { checkSubscription } from "@/lib/subscription";
 import { getUnspalshImage } from "@/lib/unsplash";
 import { createCourseSchema } from "@/validators/course";
 import { NextResponse } from "next/server";
@@ -14,6 +16,18 @@ type outputUnits = {
 
 export async function POST(req: Request, res: Response) {
   try {
+    const session = await getAuthSession();
+
+    if (!session?.user) {
+      return new NextResponse("unauthorised", { status: 401 });
+    }
+
+    const isPro = await checkSubscription();
+
+    if (session.user.credits <= 0 && !isPro) {
+      return new NextResponse("no credits", { status: 402 });
+    }
+
     const body = await req.json();
     const { title, units } = createCourseSchema.parse(body);
 
@@ -70,6 +84,18 @@ export async function POST(req: Request, res: Response) {
             unitId: prismaUnit.id,
           };
         }),
+      });
+
+      // decrease credit by 1 upon course generation
+      await prisma.user.update({
+        where: {
+          id: session.user.id,
+        },
+        data: {
+          credits: {
+            decrement: 1,
+          },
+        },
       });
     }
 
